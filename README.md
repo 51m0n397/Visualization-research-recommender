@@ -1,2 +1,1 @@
-# va-template
- Template for Visual Analytics projects
+# Visualization research recommender
