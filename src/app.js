@@ -19,6 +19,7 @@ const app = function () {
             .append('div')
             .attr('id', 'keywords_plot')
             .attr('class', 'cell')
+        keywordsPlotContainer.call(window.app.keywordsPlot)
 
         const trendsChartContainer = d3.select('#grid')
             .append('div')

@@ -9,6 +9,7 @@ class Controller {
         this.model = model
 
         this.topicsTable = views.table()
+        this.keywordsPlot = views.scatterplot()
         this.papersTable = views.table()
         this.conferencesFilter = views.checkbox()
         this.typeFilter = views.checkbox()
@@ -23,7 +24,7 @@ class Controller {
 
         this.conferencesFilter.bindClick((conference, checked) => {
             this.model.conferences[conference] = checked
-            this.onSelectedTopicChanged()
+            this.onConferencesChanged()
         }).bind(this)
 
         this.typeFilter.bindClick((type, checked) => {
@@ -39,6 +40,16 @@ class Controller {
             data: this.model.topics.map(t => ({ Topic: t.topic })),
             selected: null
         })
+
+        this.keywordsPlot.data({
+            data: this.model.keywords.map(k => ({
+                x: +k.x, y: +k.y,
+                label: k.keyword,
+                class: k.topic,
+                size: this.model.papers.filter(p => p.Keywords.includes(k.keyword)).length
+            })),
+            selected: null
+        })
     }
 
     onSelectedTopicChanged() {
@@ -47,11 +58,11 @@ class Controller {
             selected: { key: "Topic", value: this.model.selectedTopic }
         })
 
-        const papers_in_topic = this.model.papers.filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0)
+        const filteredPapers = this.model.papers.filter(p => this.model.conferences[p.Conference] && this.model.types[p.PaperType])
 
         this.papersTable.data({
-            data: papers_in_topic
-                .filter(p => this.model.conferences[p.Conference] && this.model.types[p.PaperType])
+            data: filteredPapers
+                .filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0)
                 .map(p => ({
                     Title: p.Title,
                     Authors: p.Authors.join(', '),
@@ -60,17 +71,27 @@ class Controller {
                     Year: p.Year,
                     Keywords: p.Keywords.join(', ')
                 }))
+        })
+
+        this.keywordsPlot.data({
+            data: this.model.keywords.map(k => ({
+                x: +k.x, y: +k.y,
+                label: k.keyword,
+                class: k.topic,
+                size: filteredPapers.filter(p => p.Keywords.includes(k.keyword)).length
+            })),
+            selected: this.model.selectedTopic
         })
     }
 
     onConferencesChanged() {
         this.conferencesFilter.data({ name: 'Conferences', data: this.model.conferences })
 
-        const papers_in_topic = this.model.papers.filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0)
+        const filteredPapers = this.model.papers.filter(p => this.model.conferences[p.Conference] && this.model.types[p.PaperType])
 
         this.papersTable.data({
-            data: papers_in_topic
-                .filter(p => this.model.conferences[p.Conference] && this.model.types[p.PaperType])
+            data: filteredPapers
+                .filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0)
                 .map(p => ({
                     Title: p.Title,
                     Authors: p.Authors.join(', '),
@@ -80,16 +101,26 @@ class Controller {
                     Keywords: p.Keywords.join(', ')
                 }))
         })
+
+        this.keywordsPlot.data({
+            data: this.model.keywords.map(k => ({
+                x: +k.x, y: +k.y,
+                label: k.keyword,
+                class: k.topic,
+                size: filteredPapers.filter(p => p.Keywords.includes(k.keyword)).length
+            })),
+            selected: this.model.selectedTopic
+        })
     }
 
     onTypesChanged() {
         this.typeFilter.data({ name: 'Type', data: this.model.types })
 
-        const papers_in_topic = this.model.papers.filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0)
+        const filteredPapers = this.model.papers.filter(p => this.model.conferences[p.Conference] && this.model.types[p.PaperType])
 
         this.papersTable.data({
-            data: papers_in_topic
-                .filter(p => this.model.conferences[p.Conference] && this.model.types[p.PaperType])
+            data: filteredPapers
+                .filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0)
                 .map(p => ({
                     Title: p.Title,
                     Authors: p.Authors.join(', '),
@@ -98,6 +129,16 @@ class Controller {
                     Year: p.Year,
                     Keywords: p.Keywords.join(', ')
                 }))
+        })
+
+        this.keywordsPlot.data({
+            data: this.model.keywords.map(k => ({
+                x: +k.x, y: +k.y,
+                label: k.keyword,
+                class: k.topic,
+                size: filteredPapers.filter(p => p.Keywords.includes(k.keyword)).length
+            })),
+            selected: this.model.selectedTopic
         })
     }
 }
