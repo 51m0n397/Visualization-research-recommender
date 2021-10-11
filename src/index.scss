@@ -56,6 +56,15 @@ th {
   padding: 5px;
 }
 
+.tooltip {
+  background-color: whitesmoke;
+  border: 1px solid darkgray;
+  border-width: 1px;
+  border-radius: 5px;
+  padding: 10px;
+  position: absolute;
+}
+
 .check-container {
   margin-bottom: 10px;
 }

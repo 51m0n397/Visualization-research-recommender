@@ -51,6 +51,32 @@ export default function () {
                 const colorScale = d3.scaleOrdinal(d3.schemePaired)
                     .domain(data.data.map(d => d.class))
 
+                const tooltip = dom.append("div")
+                    .style("opacity", 0)
+                    .style("display", 'none')
+                    .attr("class", "tooltip")
+
+                function mouseover(event, d) {
+                    tooltip
+                        .style("opacity", 1)
+                        .style("display", 'block')
+                }
+
+                function mousemove(event, d) {
+                    tooltip
+                        .html("keyword: " + d.label + "<br>topic: " + d.class)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY) + "px")
+                }
+
+                function mouseleave(event, d) {
+                    tooltip
+                        .transition()
+                        .duration(200)
+                        .style("opacity", 0)
+                        .on("end", () => tooltip.style("display", 'none'))
+                }
+
                 const pointsGroup = svgGroup.append('g')
                     .attr("clip-path", "url(#clip)")
 
@@ -65,6 +91,9 @@ export default function () {
                     .style("fill", (d) => colorScale(d.class))
                     .style("stroke", (d) => d.class == data.selected ? "black" : "grey")
                     .style("stroke-width", (d) => (d.class == data.selected ? 2 : 1) / zoomTransform.k)
+                    .on("mouseover", mouseover)
+                    .on("mousemove", mousemove)
+                    .on("mouseleave", mouseleave)
 
                 const zoom = d3.zoom()
                     .scaleExtent([1, Infinity])
@@ -82,7 +111,6 @@ export default function () {
 
 
                 updateData = function () {
-                    console.log("a")
                     pointsGroup.selectAll("circle")
                         .data(data.data)
                         .style("stroke-width", (d) => (d.class == data.selected ? 2 : 1) / zoomTransform.k)
