@@ -220,6 +220,61 @@ export default function () {
                         .attr("fill", "none")
                         .attr("stroke", "red")
                         .attr("stroke-width", 1.5)
+
+
+                    focus.selectAll(".pointsA")
+                        .data(data)
+                        .join(
+                            enter => enter
+                                .append('circle')
+                                .attr('class', "pointsA")
+                                .attr("cx", (d) => xScale(d.year))
+                                .attr("cy", (d) => yScale(d.papers))
+                                .attr("r", 3)
+                                .attr("fill", "steelblue")
+                                .attr("clip-path", "url(#clip-time)"),
+
+                            update => update
+                                .transition()
+                                .duration(duration)
+                                .attr('class', "pointsA")
+                                .attr("cx", (d) => xScale(d.year))
+                                .attr("cy", (d) => yScale(d.papers))
+                                .attr("r", 3)
+                                .attr("fill", "steelblue")
+                                .attr("clip-path", "url(#clip-time)")
+                                .selection(),
+
+                            exit => exit
+                                .remove()
+                        )
+
+                        focus.selectAll(".pointsB")
+                        .data(data)
+                        .join(
+                            enter => enter
+                                .append('circle')
+                                .attr('class', "pointsB")
+                                .attr("cx", (d) => xScale(d.year))
+                                .attr("cy", (d) => yScale(d.citations))
+                                .attr("r", 3)
+                                .attr("fill", "red")
+                                .attr("clip-path", "url(#clip-time)"),
+
+                            update => update
+                                .transition()
+                                .duration(duration)
+                                .attr('class', "pointsB")
+                                .attr("cx", (d) => xScale(d.year))
+                                .attr("cy", (d) => yScale(d.citations))
+                                .attr("r", 3)
+                                .attr("fill", "red")
+                                .attr("clip-path", "url(#clip-time)")
+                                .selection(),
+
+                            exit => exit
+                                .remove()
+                        )
                 }
 
                 xScale2.domain(d3.extent(data.map(d => d.year)))
