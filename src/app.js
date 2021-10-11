@@ -25,6 +25,7 @@ const app = function () {
             .append('div')
             .attr('id', 'trends_chart')
             .attr('class', 'cell')
+        trendsChartContainer.call(window.app.trendsChart)
 
         const filtersContainer = d3.select('#grid')
             .append('div')
