@@ -1,6 +1,7 @@
 body {
   font-family: sans-serif;
   background-color: whitesmoke;
+  font-size: 12px;
 }
 
 #root {
@@ -21,12 +22,64 @@ body {
 .cell {
   background-color: white;
   border-radius: 5px;
+  border: 1px solid darkgray;
 }
+
+table {
+  border-collapse: collapse;
+  border-style: hidden;
+}
+
+thead>tr {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: darkgray;
+  color: white;
+}
+
+tbody>tr {
+  background: white;
+}
+
+td{
+  border: 1px solid darkgray;
+}
+
+tbody>tr.selected {
+  background: lightskyblue;
+}
+
+td,
+th {
+  padding: 5px;
+}
+
+.check-container {
+  margin-bottom: 10px;
+}
+
+.check-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.check-elem {
+  display: inline-block;
+  margin-right: 10px;
+}
+
 
 #topics_table {
   grid-column: 1;
   grid-row: 1;
   overflow-y: scroll;
+  background: darkgray;
+
+  tbody>tr {
+    cursor: pointer;
+  }
 }
 
 #keywords_plot {
@@ -42,11 +95,12 @@ body {
 #filters {
   grid-column: 1;
   grid-row: 2;
+  padding: 10px;
 }
-
 
 #papers_table {
   grid-column: 2/4;
   grid-row: 2;
   overflow: scroll;
+  background: darkgray;
 }
