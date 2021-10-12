@@ -6,6 +6,7 @@ export default function () {
     const margin = { top: 20, right: 20, bottom: 40, left: 30 }
     const gap = 30
     const height2 = 50
+    const pointRadious = 3
 
     let updateData
     const timechart = function (selection) {
@@ -108,8 +109,39 @@ export default function () {
                 const clip = svg.append("defs").append("clipPath")
                     .attr("id", "clip-time")
                     .append("rect")
-                    .attr("width", width)
-                    .attr("height", height1)
+                    .attr("width", width + 2 * pointRadious)
+                    .attr("height", height1 + 2 * pointRadious)
+                    .attr("transform", "translate(" + (-pointRadious) + ',' + (-pointRadious) + ")")
+
+                const tooltip = dom.append("div")
+                    .style("opacity", 0)
+                    .style("display", 'none')
+                    .attr("class", "tooltip")
+
+                function mouseover(event, d) {
+                    tooltip
+                        .style("opacity", 1)
+                        .style("display", 'block')
+                }
+
+                function mousemove(event, d) {
+                    tooltip
+                        .html(
+                            "Year: " + d.year.getFullYear() +
+                            "<br>papers: " + d.papers +
+                            "<br>citations: " + d.citations
+                        )
+                        .style("right", (window.innerWidth - event.pageX + 10) + "px")
+                        .style("top", (event.pageY) + "px")
+                }
+
+                function mouseleave(event, d) {
+                    tooltip
+                        .transition()
+                        .duration(200)
+                        .style("opacity", 0)
+                        .on("end", () => tooltip.style("display", 'none'))
+                }
 
                 let startSelection = []
 
@@ -222,7 +254,7 @@ export default function () {
                         .attr("stroke-width", 1.5)
 
 
-                    focus.selectAll(".pointsA")
+                    const pointsA = focus.selectAll(".pointsA")
                         .data(data)
                         .join(
                             enter => enter
@@ -230,17 +262,16 @@ export default function () {
                                 .attr('class', "pointsA")
                                 .attr("cx", (d) => xScale(d.year))
                                 .attr("cy", (d) => yScale(d.papers))
-                                .attr("r", 3)
+                                .attr("r", pointRadious)
                                 .attr("fill", "steelblue")
                                 .attr("clip-path", "url(#clip-time)"),
-
                             update => update
                                 .transition()
                                 .duration(duration)
                                 .attr('class', "pointsA")
                                 .attr("cx", (d) => xScale(d.year))
                                 .attr("cy", (d) => yScale(d.papers))
-                                .attr("r", 3)
+                                .attr("r", pointRadious)
                                 .attr("fill", "steelblue")
                                 .attr("clip-path", "url(#clip-time)")
                                 .selection(),
@@ -249,7 +280,7 @@ export default function () {
                                 .remove()
                         )
 
-                        focus.selectAll(".pointsB")
+                    const pointsB = focus.selectAll(".pointsB")
                         .data(data)
                         .join(
                             enter => enter
@@ -257,7 +288,7 @@ export default function () {
                                 .attr('class', "pointsB")
                                 .attr("cx", (d) => xScale(d.year))
                                 .attr("cy", (d) => yScale(d.citations))
-                                .attr("r", 3)
+                                .attr("r", pointRadious)
                                 .attr("fill", "red")
                                 .attr("clip-path", "url(#clip-time)"),
 
@@ -267,7 +298,7 @@ export default function () {
                                 .attr('class', "pointsB")
                                 .attr("cx", (d) => xScale(d.year))
                                 .attr("cy", (d) => yScale(d.citations))
-                                .attr("r", 3)
+                                .attr("r", pointRadious)
                                 .attr("fill", "red")
                                 .attr("clip-path", "url(#clip-time)")
                                 .selection(),
@@ -275,6 +306,16 @@ export default function () {
                             exit => exit
                                 .remove()
                         )
+
+                    pointsA
+                        .on("mouseover", mouseover)
+                        .on("mousemove", mousemove)
+                        .on("mouseleave", mouseleave)
+
+                    pointsB
+                        .on("mouseover", mouseover)
+                        .on("mousemove", mousemove)
+                        .on("mouseleave", mouseleave)
                 }
 
                 xScale2.domain(d3.extent(data.map(d => d.year)))
