@@ -32,8 +32,7 @@
   },
   "dependencies": {
     "d3": "^6.3.1",
-    "normalize.css": "^8.0.1",
-    "sql-js": "^0.1.0"
+    "normalize.css": "^8.0.1"
   },
   "browserslist": [
     "last 2 versions",
