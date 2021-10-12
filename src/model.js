@@ -1,3 +1,5 @@
+import * as utils from './utils'
+
 class Model {
     constructor() {
         this.keywords = []
@@ -9,31 +11,23 @@ class Model {
         this.topics = []
         this.topicsById = {}
 
+        this.years = [Infinity, 0]
+
         this.selectedKeywords = []
         this.selectedTopic = null
-        this.onSelectedTopicChanged = () => { }
 
         this.conferences = {}
-        this.onConferencesChanged = () => { }
 
         this.types = {}
-        this.onTypesChanged = () => { }
 
+        this.onDataChanged = () => { }
     }
 
-    bindSelectedTopicChanged(callback) {
-        this.onSelectedTopicChanged = callback
+    bindDataChanged(callback) {
+        this.onDataChanged = callback
     }
 
-    bindConferencesChanged(callback) {
-        this.onConferencesChanged = callback
-    }
-
-    bindTypesChanged(callback) {
-        this.onTypesChanged = callback
-    }
-
-    setKeywords(keywords) {
+    setInitialData(keywords, papers) {
         keywords.forEach((keyword) => {
             this.keywords.push(keyword)
             this.keywordsById[keyword.keyword] = this.keywords.length - 1
@@ -45,16 +39,18 @@ class Model {
                 this.topics[this.topicsById[keyword.topic]].keywords.push(keyword.keyword)
         })
         this.selectedKeywords = keywords
-    }
 
-    setPapers(papers) {
         papers.forEach((paper) => {
             paper.Authors = paper.Authors.split(';')
             paper.InternalReferences = paper.InternalReferences.split(';')
             paper.Keywords = paper.Keywords.split(';')
+            paper.Topics = this.topics.filter(t => utils.arrayIntersection(t.keywords, paper.Keywords).length > 0).map(t => t.topic)
 
             this.papers.push(paper)
             this.papersById[paper.DOI] = this.papers.length - 1
+
+            if (+paper.Year < this.years[0]) this.years[0] = +paper.Year
+            if (+paper.Year > this.years[1]) this.years[1] = +paper.Year
 
             if (this.conferences[paper.Conference] == null) {
                 this.conferences[paper.Conference] = true
@@ -64,14 +60,24 @@ class Model {
                 this.types[paper.PaperType] = true
             }
         })
-        this.onConferencesChanged()
-        this.onTypesChanged()
+
+        this.onDataChanged()
     }
 
     selectTopic(topic) {
         this.selectedTopic = topic
         this.selectedKeywords = this.topics[this.topicsById[topic]].keywords
-        this.onSelectedTopicChanged()
+        this.onDataChanged()
+    }
+
+    selectConferences(conference, checked) {
+        this.conferences[conference] = checked
+        this.onDataChanged()
+    }
+
+    selectType(type, checked) {
+        this.types[type] = checked
+        this.onDataChanged()
     }
 }
 

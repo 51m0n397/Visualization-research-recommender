@@ -1,6 +1,4 @@
-import query from 'sql-js'
 import * as d3 from 'd3'
-import * as utils from './utils'
 import model from './model'
 import views from './views'
 
@@ -15,81 +13,30 @@ class Controller {
         this.conferencesFilter = views.checkbox()
         this.typeFilter = views.checkbox()
 
-        this.model.bindSelectedTopicChanged(this.onSelectedTopicChanged.bind(this))
-        this.model.bindConferencesChanged(this.onConferencesChanged.bind(this))
-        this.model.bindTypesChanged(this.onTypesChanged.bind(this))
+        this.model.bindDataChanged(this.onDataChanged.bind(this))
 
         this.topicsTable.bindClick((topic) => {
             this.model.selectTopic(topic.Topic)
         }).bind(this)
 
         this.conferencesFilter.bindClick((conference, checked) => {
-            this.model.conferences[conference] = checked
-            this.onConferencesChanged()
+            this.model.selectConferences(conference, checked)
         }).bind(this)
 
         this.typeFilter.bindClick((type, checked) => {
-            this.model.types[type] = checked
-            this.onSelectedTopicChanged()
+            this.model.selectType(type, checked)
         }).bind(this)
     }
 
     handleLoadData(keywords, papers) {
-        this.model.setKeywords(keywords)
-        this.model.setPapers(papers)
-        this.topicsTable.data({
-            data: this.model.topics.map(t => ({ Topic: t.topic })),
-            selected: null
-        })
-
-        this.keywordsPlot.data({
-            data: this.model.keywords.map(k => ({
-                x: +k.x, y: +k.y,
-                label: k.keyword,
-                class: k.topic,
-                size: this.model.papers.filter(p => p.Keywords.includes(k.keyword)).length
-            })),
-            selected: null
-        })
-    }
-
-    onSelectedTopicChanged() {
-        this.topicsTable.data({
-            data: this.model.topics.map(t => ({ Topic: t.topic })),
-            selected: { key: "Topic", value: this.model.selectedTopic }
-        })
-
-        this.onDataChanged()
-    }
-
-    onConferencesChanged() {
-        this.conferencesFilter.data({ name: 'Conferences', data: this.model.conferences })
-
-        this.onDataChanged()
-    }
-
-    onTypesChanged() {
-        this.typeFilter.data({ name: 'Type', data: this.model.types })
-
-        this.onDataChanged()
+        this.model.setInitialData(keywords, papers)
     }
 
     onDataChanged() {
-        const filteredPapers = this.model.papers.filter(p => this.model.conferences[p.Conference] && this.model.types[p.PaperType])
-        const topicPapers = filteredPapers.filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0)
-        const timeParser = d3.timeParse("%Y")
+        this.conferencesFilter.data({ name: 'Conferences', data: this.model.conferences })
+        this.typeFilter.data({ name: 'Type', data: this.model.types })
 
-        this.papersTable.data({
-            data: topicPapers
-                .map(p => ({
-                    Title: p.Title,
-                    Authors: p.Authors.join(', '),
-                    Conference: p.Conference,
-                    "Paper type": p.PaperType,
-                    Year: p.Year,
-                    Keywords: p.Keywords.join(', ')
-                }))
-        })
+        const filteredPapers = this.model.papers.filter(p => this.model.conferences[p.Conference] && this.model.types[p.PaperType])
 
         this.keywordsPlot.data({
             data: this.model.keywords.map(k => ({
@@ -101,53 +48,55 @@ class Controller {
             selected: this.model.selectedTopic
         })
 
-        if (topicPapers.length > 0) {
-            const papersPerYear = Object.fromEntries(query()
-                .select()
-                .from(topicPapers)
-                .groupBy(p => p.Year)
-                .execute())
+        const selectedTopicPapers = filteredPapers.filter(p => p.Topics.includes(this.model.selectedTopic))
 
-            // topics cited by papers
-            const papersCitedTopics = this.model.papers.map(p => ({
-                year: p.Year,
-                topics: new Set(p.InternalReferences.map(r => {
-                    // replacing list of citations with list of keywords of the cited papers
-                    const id = this.model.papersById[r]
-                    if (id != undefined && filteredPapers.includes(this.model.papers[id]))
-                        return this.model.papers[id].Keywords
-                    else return []
-                }).flat(1).map(k => {
-                    // replacing keywords with topics
-                    const id = this.model.keywordsById[k]
-                    if (id != undefined) return this.model.keywords[id].topic
-                    else return id
-                }).filter(t => t))
-            }))
+        this.papersTable.data({
+            data: selectedTopicPapers
+                .map(p => ({
+                    Title: p.Title,
+                    Authors: p.Authors.join(', '),
+                    Conference: p.Conference,
+                    "Paper type": p.PaperType,
+                    Year: p.Year,
+                    Keywords: p.Keywords.join(', '),
+                    Topics: p.Topics.join(', '),
+                }))
+        })
 
-            const citationsPerYear = Object.fromEntries(query()
-                .select()
-                .from(papersCitedTopics.filter(p => p.topics.has(this.model.selectedTopic)))
-                .groupBy(p => p.year)
-                .execute())
+        // for each paper tells the topics of the cited papers
+        const topicsCitedByPapers = filteredPapers.map(p => ({
+            DOI: p.DOI,
+            Year: p.Year,
+            citedTopics: [].concat.apply([], p.InternalReferences.map(DOI => this.model.papers[this.model.papersById[DOI]]).filter(p => p).map(p => p.Topics))
+        }))
 
-            const years = query()
-                .select()
-                .from(this.model.papers)
-                .groupBy(p => p.Year)
-                .execute()
-                .map(x => x[0])
+        const citations = [].concat.apply([], topicsCitedByPapers.map(p => p.citedTopics))
+        this.topicsTable.data({
+            data: this.model.topics.map(t => ({
+                Topic: t.topic,
+                Papers: filteredPapers.filter(p => p.Topics.includes(t.topic)).length,
+                Citations: citations.filter(c => c == t.topic).length
+            })),
+            selected: { key: "Topic", value: this.model.selectedTopic }
+        })
 
-            let data = []
+        const papersPerYear = d3.group(selectedTopicPapers, p => p.Year)
+        const citationsPerYear = d3.group(topicsCitedByPapers, p => p.Year)
 
-            for (let i = Math.min(...years); i <= Math.max(...years); i++) {
-                const papers = papersPerYear[i] != null ? papersPerYear[i].length : 0
-                const citations = citationsPerYear[i] != null ? citationsPerYear[i].length : 0
-                data.push({ year: timeParser(i), papers: papers, citations: citations })
+        const timeParser = d3.timeParse("%Y")
+        let trendsData = []
+
+        if (this.model.selectedTopic) {
+            for (let i = this.model.years[0]; i <= this.model.years[1]; i++) {
+                let papers = papersPerYear.get(String(i))
+                papers = papers != null ? papers.length : 0
+                let citations = citationsPerYear.get(String(i))
+                citations = citations != null ? [].concat.apply([], citations.map(p => p.citedTopics)).filter(t => t == this.model.selectedTopic).length : 0
+                trendsData.push({ year: timeParser(i), papers: papers, citations: citations })
             }
+        }
 
-            this.trendsChart.data(data)
-        } else this.trendsChart.data([])
+        this.trendsChart.data(trendsData)
     }
 }
 
