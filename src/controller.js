@@ -64,10 +64,11 @@ class Controller {
         })
 
         // for each paper tells the topics of the cited papers
+        // both the citing and cited papers are filtered (is this right?)
         const topicsCitedByPapers = filteredPapers.map(p => ({
             DOI: p.DOI,
             Year: p.Year,
-            citedTopics: [].concat.apply([], p.InternalReferences.map(DOI => this.model.papers[this.model.papersById[DOI]]).filter(p => p).map(p => p.Topics))
+            citedTopics: [].concat.apply([], p.InternalReferences.map(DOI => this.model.papers[this.model.papersById[DOI]]).filter(p => filteredPapers.includes(p)).map(p => p.Topics))
         }))
 
         const citations = [].concat.apply([], topicsCitedByPapers.map(p => p.citedTopics))
