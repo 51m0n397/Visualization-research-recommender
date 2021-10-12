@@ -13,36 +13,68 @@ const app = function () {
             .append('div')
             .attr('id', 'topics_table')
             .attr('class', 'cell')
-        topicsTableContainer.call(window.app.topicsTable)
+        topicsTableContainer
+            .append('div')
+            .attr('class', 'title')
+            .html('Topics')
+        topicsTableContainer
+            .append('div')
+            .attr('class', 'table_container')
+            .call(window.app.topicsTable)
 
         const keywordsPlotContainer = d3.select('#grid')
             .append('div')
             .attr('id', 'keywords_plot')
             .attr('class', 'cell')
-        keywordsPlotContainer.call(window.app.keywordsPlot)
+        keywordsPlotContainer
+            .append('div')
+            .attr('class', 'title')
+            .html('Keywords')
+        keywordsPlotContainer
+            .append('div')
+            .call(window.app.keywordsPlot)
 
         const trendsChartContainer = d3.select('#grid')
             .append('div')
             .attr('id', 'trends_chart')
             .attr('class', 'cell')
-        trendsChartContainer.call(window.app.trendsChart)
+        trendsChartContainer
+            .append('div')
+            .attr('class', 'title')
+            .html('Trends')
+        trendsChartContainer
+            .append('div')
+            .call(window.app.trendsChart)
 
         const filtersContainer = d3.select('#grid')
             .append('div')
             .attr('id', 'filters')
             .attr('class', 'cell')
+        filtersContainer
+            .append('div')
+            .attr('class', 'title')
+            .html('Filters')
         filtersContainer.append('div')
             .attr('id', 'conferences-filter')
+            .style('margin', '10px')
             .call(window.app.conferencesFilter)
         filtersContainer.append('div')
             .attr('id', 'type-filter')
+            .style('margin', '10px')
             .call(window.app.typeFilter)
 
         const papersTableContainer = d3.select('#grid')
             .append('div')
             .attr('id', 'papers_table')
             .attr('class', 'cell')
-        papersTableContainer.call(window.app.papersTable)
+        papersTableContainer
+            .append('div')
+            .attr('class', 'title')
+            .html('Papers')
+        papersTableContainer
+            .append('div')
+            .attr('class', 'table_container')
+            .call(window.app.papersTable)
     })
 }
 

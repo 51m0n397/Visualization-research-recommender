@@ -3,10 +3,17 @@ import * as d3 from 'd3'
 export default function () {
     let data = []
 
-    const margin = { top: 20, right: 20, bottom: 40, left: 30 }
+    const margin = { top: 10, right: 20, bottom: 10, left: 30 }
     const gap = 30
     const height2 = 50
+    const gap1 = 30
+    const height3 = 10
     const pointRadious = 3
+
+    const rectWidth = 10
+    const legendMargin = 10
+    const pad1 = 5
+    const pad2 = 10
 
     let updateData
     const timechart = function (selection) {
@@ -27,7 +34,7 @@ export default function () {
 
                 const width = bBox.width - margin.left - margin.right
                 const height = bBox.height - margin.top - margin.bottom
-                const height1 = height - gap - height2
+                const height1 = height - gap - height2 - gap1 - height3
 
                 const numTicksX = Math.floor(width / 40)
                 const numTicksY = Math.floor(height1 / 20)
@@ -39,6 +46,39 @@ export default function () {
                 const context = svg.append("g")
                     .attr("transform",
                         "translate(" + margin.left + "," + (margin.top + height1 + gap) + ")")
+
+                const legend = svg.append("g")
+                    .attr("transform",
+                        "translate(" + legendMargin + "," + (margin.top + height1 + gap + height2 + gap1) + ")")
+
+                let xPos = 0
+                legend.append("rect")
+                    .attr("x", xPos)
+                    .attr("y", 0)
+                    .attr("height", rectWidth)
+                    .attr("width", rectWidth)
+                    .attr("fill", "steelblue")
+
+                xPos += rectWidth + pad1
+                const papersText = legend
+                    .append("text")
+                    .attr("x", xPos)
+                    .attr("y", 10)
+                    .text("Papers")
+
+                xPos += papersText.node().getBoundingClientRect().width + pad2
+                legend.append("rect")
+                    .attr("x", xPos)
+                    .attr("y", 0)
+                    .attr("height", rectWidth)
+                    .attr("width", rectWidth)
+                    .attr("fill", "red")
+
+                xPos += rectWidth + pad1
+                legend.append("text")
+                    .attr("x", xPos)
+                    .attr("y", 10)
+                    .text("Citations")
 
                 const xScale = d3.scaleTime()
                     .domain([])
@@ -316,6 +356,8 @@ export default function () {
                         .on("mouseover", mouseover)
                         .on("mousemove", mousemove)
                         .on("mouseleave", mouseleave)
+
+
                 }
 
                 xScale2.domain(d3.extent(data.map(d => d.year)))

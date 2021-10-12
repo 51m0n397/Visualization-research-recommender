@@ -14,7 +14,7 @@ body {
   flex: 1;
   display: grid;
   margin: 10px;
-  grid-template-columns: minmax(0, 1fr) 50vh minmax(0, 1fr);//repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) 50vh minmax(0, 1fr);
   grid-template-rows: repeat(2, minmax(0, 1fr));
   grid-gap: 10px;
 }
@@ -26,33 +26,63 @@ body {
 }
 
 table {
-  border-collapse: collapse;
-  border-style: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-thead>tr {
+th {
+  border-top: 1px solid darkgray;
+  border-bottom: 1px solid darkgray;
+  border-right: 1px solid darkgray;
+  padding: 5px;
+}
+
+td {
+  border-bottom: 1px solid darkgray;
+  border-right: 1px solid darkgray;
+  padding: 5px;
+}
+
+th {
+  border-top: 0;
+  cursor: s-resize;
+}
+
+th:last-child,
+td:last-child {
+  border-right: 0;
+}
+
+tbody tr {
+  background: white;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0px;
+}
+
+tbody tr.selected {
+  background: lightskyblue;
+}
+
+thead th {
   position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 1;
-  background: darkgray;
+  background: whitesmoke;
+}
+
+.table_container {
+  flex: 1;
+  overflow-y: scroll;
+}
+
+.title {
+  background-color: darkgray;
   color: white;
-}
-
-tbody>tr {
-  background: white;
-}
-
-td{
-  border: 1px solid darkgray;
-}
-
-tbody>tr.selected {
-  background: lightskyblue;
-}
-
-td,
-th {
+  text-align: center;
+  font-weight: bold;
   padding: 5px;
 }
 
@@ -91,10 +121,12 @@ th.aes:after {
 #topics_table {
   grid-column: 1;
   grid-row: 1;
-  overflow-y: scroll;
   background: darkgray;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 
-  tbody>tr {
+  tbody tr {
     cursor: pointer;
   }
 }
@@ -102,22 +134,29 @@ th.aes:after {
 #keywords_plot {
   grid-column: 2;
   grid-row: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: min-content minmax(0, 1fr);
 }
 
 #trends_chart {
   grid-column: 3;
   grid-row: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: min-content minmax(0, 1fr);
 }
 
 #filters {
   grid-column: 1;
   grid-row: 2;
-  padding: 10px;
 }
 
 #papers_table {
   grid-column: 2/4;
   grid-row: 2;
-  overflow: scroll;
   background: darkgray;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
