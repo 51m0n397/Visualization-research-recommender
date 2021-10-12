@@ -65,6 +65,7 @@ export default function () {
 
             updateData = function () {
                 const titles = data.data.length > 0 ? Object.keys(data.data[0]) : []
+                if (titles.length > 0 && sorting == null)
                 sorting = [titles[0], 0]
 
                 const headers = header
