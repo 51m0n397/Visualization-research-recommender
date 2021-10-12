@@ -56,6 +56,14 @@ th {
   padding: 5px;
 }
 
+th.des:after {
+  content: "\21E9";
+}
+
+th.aes:after {
+  content: "\21E7";
+}
+
 .tooltip {
   background-color: whitesmoke;
   border: 1px solid darkgray;
