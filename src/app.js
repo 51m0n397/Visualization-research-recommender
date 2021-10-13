@@ -62,6 +62,10 @@ const app = function () {
             .attr('id', 'type-filter')
             .style('margin', '10px')
             .call(window.app.typeFilter)
+        filtersContainer.append('div')
+            .attr('id', 'hIndex-filter')
+            .style('margin', '10px')
+            .call(window.app.hIndexFilter)
 
         const papersTableContainer = d3.select('#grid')
             .append('div')

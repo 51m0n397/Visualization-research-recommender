@@ -14,6 +14,12 @@ class Model {
         this.topics = []
         this.topicsById = {}
 
+        this.authors = []
+        this.authorsById = {}
+
+        this.hIndexRange = [Infinity, 0]
+        this.selectedHindex = []
+
         this.years = [Infinity, 0]
 
         this.selectedKeywords = []
@@ -50,6 +56,8 @@ class Model {
             paper.InternalReferences = paper.InternalReferences.split(';')
             paper.Keywords = paper.Keywords.split(';')
             paper.Topics = this.topics.filter(t => utils.arrayIntersection(t.keywords, paper.Keywords).length > 0).map(t => t.topic)
+            paper.Citations = 0
+            paper.bestHIndex = 0
 
             this.papers.push(paper)
             this.papersById[paper.DOI] = this.papers.length - 1
@@ -65,6 +73,46 @@ class Model {
                 this.types[paper.PaperType] = true
             }
         })
+
+        this.papers.forEach(p => {
+            p.InternalReferences.forEach(c => {
+                const citedPaper = this.papers[this.papersById[c]]
+                if (citedPaper)
+                    citedPaper.Citations++
+            })
+        })
+
+        this.papers.forEach(p => {
+            p.Authors.forEach(a => {
+                if (this.authorsById[a] == null) {
+                    this.authors.push({ author: a, papers: [{ paper: p.DOI, citations: p.Citations }] })
+                    this.authorsById[a] = this.authors.length - 1
+                } else {
+                    this.authors[this.authorsById[a]].papers.push({ paper: p.DOI, citations: p.Citations })
+                }
+            })
+        })
+
+        this.authors.forEach(a => {
+            a.hIndex = 0
+            const citations = [...(new Set(a.papers.map(p => p.citations)))].sort(d3.ascending)
+            for (let i = 0; i < citations.length; i++) {
+                if (a.papers.filter(p => p.citations >= citations[i]).length >= citations[i])
+                    a.hIndex = citations[i]
+                else break
+            }
+
+            a.papers.forEach(p => {
+                const paper = this.papers[this.papersById[p.paper]]
+                if (a.hIndex > paper.bestHIndex)
+                    paper.bestHIndex = a.hIndex
+            })
+            
+            if (a.hIndex < this.hIndexRange[0]) this.hIndexRange[0] = a.hIndex
+            if (a.hIndex > this.hIndexRange[1]) this.hIndexRange[1] = a.hIndex
+        })
+
+        this.selectedHindex = this.hIndexRange
 
         this.onDataChanged()
     }
@@ -88,6 +136,11 @@ class Model {
 
     selectType(type, checked) {
         this.types[type] = checked
+        this.onDataChanged()
+    }
+
+    selectHindex(hIndexRange) {
+        this.selectedHindex = hIndexRange
         this.onDataChanged()
     }
 }

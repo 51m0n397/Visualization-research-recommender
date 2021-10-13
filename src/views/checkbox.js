@@ -10,13 +10,13 @@ export default function () {
             const div = this
             const dom = d3.select(div)
 
-            dom.attr('class', "check-container")
+            dom.attr('class', "input-container")
 
             dom.append("div")
                 .html(data.name + ":")
-                .attr('class', "check-title")
+                .attr('class', "input-title")
 
-            dom.selectAll(".input")
+            dom.selectAll("input")
                 .data(Object.entries(data.data))
                 .enter()
                 .append("div")

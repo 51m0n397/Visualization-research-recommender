@@ -13,6 +13,7 @@ class Controller {
         this.papersTable = views.table()
         this.conferencesFilter = views.checkbox()
         this.typeFilter = views.checkbox()
+        this.hIndexFilter = views.range()
 
         this.model.bindDataChanged(this.onDataChanged.bind(this))
 
@@ -31,6 +32,10 @@ class Controller {
         this.typeFilter.bindClick((type, checked) => {
             this.model.selectType(type, checked)
         }).bind(this)
+
+        this.hIndexFilter.bindSelect((hIndexRange) => {
+            this.model.selectHindex(hIndexRange)
+        }).bind(this)
     }
 
     handleLoadData(keywords, papers) {
@@ -40,8 +45,14 @@ class Controller {
     onDataChanged() {
         this.conferencesFilter.data({ name: 'Conferences', data: this.model.conferences })
         this.typeFilter.data({ name: 'Type', data: this.model.types })
+        this.hIndexFilter.data({ name: 'H-index', range: this.model.hIndexRange, selected: this.model.selectedHindex})
 
-        const filteredPapers = this.model.papers.filter(p => this.model.conferences[p.Conference] && this.model.types[p.PaperType])
+        const filteredPapers = this.model.papers.filter(p => 
+            this.model.conferences[p.Conference] && 
+            this.model.types[p.PaperType] && 
+            p.bestHIndex >= this.model.selectedHindex[0] && 
+            p.bestHIndex <= this.model.selectedHindex[1]
+        )
 
         this.keywordsPlot.data({
             data: this.model.keywords.map(k => ({
