@@ -84,7 +84,6 @@ export default function () {
             })
 
             updateData = function () {
-                console.log('up')
                 const titles = (data.data.length > 0 ? Object.keys(data.data[0]) : []).filter(t => t != 'color')
                 const color = data.data.length > 0 && Object.keys(data.data[0]).includes('color')
                 if (titles.length > 0 && sorting == null)
