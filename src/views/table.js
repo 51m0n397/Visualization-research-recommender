@@ -16,7 +16,8 @@ export default function () {
         selection.each(function () {
             const dom = d3.select(this)
 
-            const titles = data.data.length > 0 ? Object.keys(data.data[0]) : []
+            const titles = (data.data.length > 0 ? Object.keys(data.data[0]) : []).filter(t => t != 'color')
+            const color = data.data.length > 0 && Object.keys(data.data[0]).includes('color')
             if (titles.length > 0 && sorting == null)
                 sorting = [titles[0], 0]
 
@@ -43,11 +44,30 @@ export default function () {
                     return ''
                 })
             rows.selectAll('td')
-                .data((d) => titles.map((k) => ({ 'value': d[k], 'name': k })))
+                .data((d) => titles.map((k) => ({ 'value': d[k], 'name': k, 'color': d.color })))
                 .enter()
                 .append('td')
                 .attr('data-th', (d) => d.name)
-                .text((d) => d.value)
+                .append("div")
+                .attr('class', 'table-cell')
+                .style("display", 'flex')
+                .style("align-items", 'center')
+                .html((d, i) => {
+                    if (i == 0 && color)
+                        return '<svg></svg>' + '<div style="flex:1">' + d.value + '</div>'
+                    return d.value
+                })
+                .select('svg')
+                .attr('height', "1em")
+                .attr('width', "1em")
+                .style("padding-right", '5px')
+                .append('circle')
+                .attr("cx", (d) => "0.5em")
+                .attr("cy", (d) => "0.5em")
+                .attr("r", (d) => "0.4em")
+                .attr("fill", (d) => d.color)
+                .style("stroke", "grey")
+                .style("stroke-width", 1)
 
             rows.on('click', (_e, d) => onClick(d))
 
@@ -64,9 +84,10 @@ export default function () {
             })
 
             updateData = function () {
-                const titles = data.data.length > 0 ? Object.keys(data.data[0]) : []
+                const titles = (data.data.length > 0 ? Object.keys(data.data[0]) : []).filter(t => t != 'color')
+                const color = data.data.length > 0 && Object.keys(data.data[0]).includes('color')
                 if (titles.length > 0 && sorting == null)
-                sorting = [titles[0], 0]
+                    sorting = [titles[0], 0]
 
                 const headers = header
                     .selectAll('th')
@@ -104,15 +125,50 @@ export default function () {
 
 
                 rows.selectAll('td')
-                    .data((d) => titles.map((k) => ({ 'value': d[k], 'name': k })))
+                    .data((d) => titles.map((k) => ({ 'value': d[k], 'name': k, 'color': d.color })))
                     .join(
                         enter => enter
                             .append('td')
                             .attr('data-th', (d) => d.name)
-                            .text((d) => d.value),
+                            .append("div")
+                            .attr('class', 'table-cell')
+                            .style("display", 'flex')
+                            .style("align-items", 'center')
+                            .html((d, i) => {
+                                if (i == 0 && color)
+                                    return '<svg></svg>' + '<div style="flex:1">' + d.value + '</div>'
+                                return d.value
+                            })
+                            .select('svg')
+                            .attr('height', "1em")
+                            .attr('width', "1em")
+                            .style("padding-right", '5px')
+                            .append('circle')
+                            .attr("cx", (d) => "0.5em")
+                            .attr("cy", (d) => "0.5em")
+                            .attr("r", (d) => "0.4em")
+                            .attr("fill", (d) => d.color)
+                            .style("stroke", "grey")
+                            .style("stroke-width", 1),
                         update => update
                             .attr('data-th', (d) => d.name)
-                            .text((d) => d.value),
+                            .select('table-cell')
+                            .html((d, i) => {
+                                if (i == 0 && color)
+                                    return '<svg></svg>' + '<div style="flex:1">' + d.value + '</div>'
+                                return d.value
+                            })
+                            .select('svg')
+                            .attr('height', "1em")
+                            .attr('width', "1em")
+                            .style("padding-right", '5px')
+                            .append('circle')
+                            .attr("cx", (d) => "0.5em")
+                            .attr("cy", (d) => "0.5em")
+                            .attr("r", (d) => "0.4em")
+                            .attr("fill", (d) => d.color)
+                            .style("stroke", "grey")
+                            .style("stroke-width", 1),
                         exit => exit.remove()
                     )
 

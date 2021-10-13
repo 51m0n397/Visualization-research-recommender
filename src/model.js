@@ -1,7 +1,10 @@
 import * as utils from './utils'
+import * as d3 from 'd3'
 
 class Model {
     constructor() {
+        this.colorScale = d3.scaleOrdinal(d3.schemePaired)
+
         this.keywords = []
         this.keywordsById = {}
 
@@ -28,12 +31,15 @@ class Model {
     }
 
     setInitialData(keywords, papers) {
+        this.colorScale.domain(keywords.map(k => k.topic))
+
         keywords.forEach((keyword) => {
+            keyword.color = this.colorScale(keyword.topic)
             this.keywords.push(keyword)
             this.keywordsById[keyword.keyword] = this.keywords.length - 1
 
             if (this.topicsById[keyword.topic] == null) {
-                this.topics.push({ topic: keyword.topic, keywords: [keyword.keyword] })
+                this.topics.push({ topic: keyword.topic, keywords: [keyword.keyword], color: keyword.color })
                 this.topicsById[keyword.topic] = this.topics.length - 1
             } else
                 this.topics[this.topicsById[keyword.topic]].keywords.push(keyword.keyword)

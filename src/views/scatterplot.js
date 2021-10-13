@@ -86,9 +86,6 @@ export default function () {
                     .domain(d3.extent(data.data.map(d => d.size)))
                     .range([4, 15])
 
-                const colorScale = d3.scaleOrdinal(d3.schemePaired)
-                    .domain(data.data.map(d => d.class))
-
                 const tooltip = dom.append("div")
                     .style("opacity", 0)
                     .style("display", 'none')
@@ -126,7 +123,7 @@ export default function () {
                     .attr("cy", (d) => yScale(d.y))
                     .attr("transform", zoomTransform)
                     .attr("r", (d) => d.size > 0 ? sizeScale(d.size) / zoomTransform.k : 0)
-                    .style("fill", (d) => colorScale(d.class))
+                    .style("fill", (d) => d.color)
                     .style("stroke", (d) => data.selected.includes(d.label) ? "black" : "grey")
                     .style("stroke-width", (d) => (data.selected.includes(d.label) ? 2 : 1) / zoomTransform.k)
                     .on("mouseover", mouseover)
@@ -189,7 +186,7 @@ export default function () {
                         .attr("cy", (d) => yScale(d.y))
                         .attr("transform", zoomTransform)
                         .attr("r", (d) => d.size > 0 ? sizeScale(d.size) / zoomTransform.k : 0)
-                        .style("fill", (d) => colorScale(d.class))
+                        .style("fill", (d) => d.color)
                         .style("stroke", (d) => data.selected.includes(d.label) ? "black" : "grey")
                 }
 

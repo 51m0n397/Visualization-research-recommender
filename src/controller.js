@@ -48,7 +48,8 @@ class Controller {
                 x: +k.x, y: +k.y,
                 label: k.keyword,
                 class: k.topic,
-                size: filteredPapers.filter(p => p.Keywords.includes(k.keyword)).length
+                size: filteredPapers.filter(p => p.Keywords.includes(k.keyword)).length,
+                color: k.color
             })),
             selected: this.model.selectedKeywords
         })
@@ -81,7 +82,8 @@ class Controller {
             data: this.model.topics.map(t => ({
                 Topic: t.topic,
                 Papers: filteredPapers.filter(p => p.Topics.includes(t.topic)).length,
-                Citations: citations.filter(c => c.Topics.includes(t.topic)).length
+                Citations: citations.filter(c => c.Topics.includes(t.topic)).length,
+                color: t.color
             })),
             selected: { key: "Topic", value: this.model.selectedTopic }
         })
