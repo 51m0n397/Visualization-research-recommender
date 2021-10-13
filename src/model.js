@@ -38,7 +38,6 @@ class Model {
             } else
                 this.topics[this.topicsById[keyword.topic]].keywords.push(keyword.keyword)
         })
-        this.selectedKeywords = keywords
 
         papers.forEach((paper) => {
             paper.Authors = paper.Authors.split(';')
@@ -67,6 +66,12 @@ class Model {
     selectTopic(topic) {
         this.selectedTopic = topic
         this.selectedKeywords = this.topics[this.topicsById[topic]].keywords
+        this.onDataChanged()
+    }
+
+    selectKeywords(keywords) {
+        this.selectedTopic = null
+        this.selectedKeywords = keywords
         this.onDataChanged()
     }
 

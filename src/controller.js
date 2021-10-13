@@ -1,4 +1,5 @@
 import * as d3 from 'd3'
+import * as utils from './utils'
 import model from './model'
 import views from './views'
 
@@ -17,6 +18,10 @@ class Controller {
 
         this.topicsTable.bindClick((topic) => {
             this.model.selectTopic(topic.Topic)
+        }).bind(this)
+
+        this.keywordsPlot.bindSelect((keywords) => {
+            this.model.selectKeywords(keywords)
         }).bind(this)
 
         this.conferencesFilter.bindClick((conference, checked) => {
@@ -45,13 +50,13 @@ class Controller {
                 class: k.topic,
                 size: filteredPapers.filter(p => p.Keywords.includes(k.keyword)).length
             })),
-            selected: this.model.selectedTopic
+            selected: this.model.selectedKeywords
         })
 
-        const selectedTopicPapers = filteredPapers.filter(p => p.Topics.includes(this.model.selectedTopic))
+        const selectedPapers = filteredPapers.filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0)
 
         this.papersTable.data({
-            data: selectedTopicPapers
+            data: selectedPapers
                 .map(p => ({
                     Title: p.Title,
                     Authors: p.Authors.join(', '),
@@ -63,36 +68,37 @@ class Controller {
                 }))
         })
 
-        // for each paper tells the topics of the cited papers
-        // both the citing and cited papers are filtered (is this right?)
-        const topicsCitedByPapers = filteredPapers.map(p => ({
+        // for each paper tells the cited papers
+        // only cited papers are filtered (is this right?)
+        const papersCitations = this.model.papers.map(p => ({
             DOI: p.DOI,
             Year: p.Year,
-            citedTopics: [].concat.apply([], p.InternalReferences.map(DOI => this.model.papers[this.model.papersById[DOI]]).filter(p => filteredPapers.includes(p)).map(p => p.Topics))
+            citations: p.InternalReferences.map(DOI => this.model.papers[this.model.papersById[DOI]]).filter(p => filteredPapers.includes(p)),
         }))
 
-        const citations = [].concat.apply([], topicsCitedByPapers.map(p => p.citedTopics))
+        const citations = [].concat.apply([], papersCitations.map(p => p.citations))
         this.topicsTable.data({
             data: this.model.topics.map(t => ({
                 Topic: t.topic,
                 Papers: filteredPapers.filter(p => p.Topics.includes(t.topic)).length,
-                Citations: citations.filter(c => c == t.topic).length
+                Citations: citations.filter(c => c.Topics.includes(t.topic)).length
             })),
             selected: { key: "Topic", value: this.model.selectedTopic }
         })
 
-        const papersPerYear = d3.group(selectedTopicPapers, p => p.Year)
-        const citationsPerYear = d3.group(topicsCitedByPapers, p => p.Year)
+        const papersPerYear = d3.group(selectedPapers, p => p.Year)
+        const citationsPerYear = d3.group(papersCitations, p => p.Year)
 
         const timeParser = d3.timeParse("%Y")
         let trendsData = []
 
-        if (this.model.selectedTopic) {
+        if (selectedPapers.length>0) {
             for (let i = this.model.years[0]; i <= this.model.years[1]; i++) {
                 let papers = papersPerYear.get(String(i))
                 papers = papers != null ? papers.length : 0
                 let citations = citationsPerYear.get(String(i))
-                citations = citations != null ? [].concat.apply([], citations.map(p => p.citedTopics)).filter(t => t == this.model.selectedTopic).length : 0
+                citations = papers != null ? [].concat.apply([], citationsPerYear.get(String(i)).map(p => p.citations)) : []
+                citations = citations.filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0).length
                 trendsData.push({ year: timeParser(i), papers: papers, citations: citations })
             }
         }

@@ -2,18 +2,56 @@ import * as d3 from 'd3'
 import * as utils from '../utils'
 
 export default function () {
-    let data = { data: [], selected: null }
+    let data = { data: [], selected: [] }
 
-    const margin = { top: 0, right: 0, bottom: 0, left: 0 }
+    const margin = { top: 0, right: 0, bottom: 25, left: 0 }
 
     let updateData
+    let onSelect
     const scatterplot = function (selection) {
         selection.each(function () {
             const div = this
             const dom = d3.select(div)
             const svg = dom.append("svg")
 
+            const zoom = d3.zoom()
+            const brush = d3.brush()
             let zoomTransform = d3.zoomIdentity
+
+            let zoomOrBrush = "zoom"
+
+            const zoomBrush = dom.append('div')
+                .attr('class', 'zoom-brush')
+            zoomBrush.append("input")
+                .attr('type', 'radio')
+                .attr('name', 'zoom-brush')
+                .attr('value', 'zoom')
+                .attr('id', 'zoom')
+                .attr('checked', 'true')
+                .style('margin-left', '10px')
+            zoomBrush.append("label")
+                .attr('for', 'zoom')
+                .html(' Zoom')
+            zoomBrush.append("input")
+                .attr('type', 'radio')
+                .attr('name', 'zoom-brush')
+                .attr('value', 'brush')
+                .attr('id', 'brush')
+                .style('margin-left', '10px')
+            zoomBrush.append("label")
+                .attr('for', 'brush')
+                .html(' Brush')
+            zoomBrush.on("change", () => {
+                zoomOrBrush = div.querySelector("input[name='zoom-brush']:checked").value
+
+                if (zoomOrBrush == 'zoom') {
+                    svg.select('.brush').on('.brush', null)
+                    svg.call(zoom).call(zoom.transform, zoomTransform)
+                } else {
+                    svg.on('.zoom', null)
+                    svg.select('.brush').call(brush)
+                }
+            })
 
 
             function draw() {
@@ -22,7 +60,7 @@ export default function () {
                 svg.selectAll("*").remove()
 
                 svg.attr("width", bBox.width)
-                    .attr("height", bBox.height)
+                    .attr("height", bBox.height - margin.bottom)
 
                 const width = bBox.width - margin.left - margin.right
                 const height = bBox.height - margin.top - margin.bottom
@@ -89,13 +127,13 @@ export default function () {
                     .attr("transform", zoomTransform)
                     .attr("r", (d) => d.size > 0 ? sizeScale(d.size) / zoomTransform.k : 0)
                     .style("fill", (d) => colorScale(d.class))
-                    .style("stroke", (d) => d.class == data.selected ? "black" : "grey")
-                    .style("stroke-width", (d) => (d.class == data.selected ? 2 : 1) / zoomTransform.k)
+                    .style("stroke", (d) => data.selected.includes(d.label) ? "black" : "grey")
+                    .style("stroke-width", (d) => (data.selected.includes(d.label) ? 2 : 1) / zoomTransform.k)
                     .on("mouseover", mouseover)
                     .on("mousemove", mousemove)
                     .on("mouseleave", mouseleave)
 
-                const zoom = d3.zoom()
+                zoom
                     .scaleExtent([1, Infinity])
                     .translateExtent([[0, 0], [width, height]])
                     .extent([[0, 0], [width, height]])
@@ -104,16 +142,47 @@ export default function () {
                         pointsGroup.selectAll("circle")
                             .attr("transform", zoomTransform)
                             .attr("r", (d) => d.size > 0 ? sizeScale(d.size) / zoomTransform.k : 0)
-                            .style("stroke-width", (d) => (d.class == data.selected ? 2 : 1) / zoomTransform.k)
+                            .style("stroke-width", (d) => (data.selected.includes(d.label) ? 2 : 1) / zoomTransform.k)
                     })
 
-                svg.call(zoom).call(zoom.transform, zoomTransform)
+                const brushArea = svg.append("g")
+                    .attr("class", "brush")
 
+                brush
+                    .extent([[0, 0], [width, height]])
+                    .on('end', (event) => {
+                        if (event.selection) {
+                            const selection = [
+                                zoomTransform.invert(event.selection[0]),
+                                zoomTransform.invert(event.selection[1])
+                            ]
+
+                            const selected = data.data.filter(d => 
+                                selection[0][0] <= xScale(d.x) && 
+                                xScale(d.x) <= selection[1][0] && 
+                                selection[0][1] <= yScale(d.y) && 
+                                yScale(d.y) <= selection[1][1] 
+                            ).map(d => d.label)
+
+                            onSelect(selected)
+
+                            brushArea.call(brush.move, null)
+                        }
+                    })
+
+
+                if (zoomOrBrush == 'zoom') {
+                    brushArea.on('.brush', null)
+                    svg.call(zoom).call(zoom.transform, zoomTransform)
+                } else {
+                    svg.on('.zoom', null)
+                    brushArea.call(brush)
+                }
 
                 updateData = function () {
                     pointsGroup.selectAll("circle")
                         .data(data.data)
-                        .style("stroke-width", (d) => (d.class == data.selected ? 2 : 1) / zoomTransform.k)
+                        .style("stroke-width", (d) => (data.selected.includes(d.label) ? 2 : 1) / zoomTransform.k)
                         .transition()
                         .duration(500)
                         .attr("cx", (d) => xScale(d.x))
@@ -121,7 +190,7 @@ export default function () {
                         .attr("transform", zoomTransform)
                         .attr("r", (d) => d.size > 0 ? sizeScale(d.size) / zoomTransform.k : 0)
                         .style("fill", (d) => colorScale(d.class))
-                        .style("stroke", (d) => d.class == data.selected ? "black" : "grey")
+                        .style("stroke", (d) => data.selected.includes(d.label) ? "black" : "grey")
                 }
 
             }
@@ -137,6 +206,8 @@ export default function () {
         if (typeof updateData === 'function') updateData()
         return scatterplot
     }
+
+    scatterplot.bindSelect = (callback) => onSelect = callback
 
     return scatterplot
 }
