@@ -153,7 +153,11 @@ export default function () {
                             .style("stroke-width", 1),
                         update => update
                             .attr('data-th', (d) => d.name)
-                            .select('table-cell')
+                            .html('')
+                            .append("div")
+                            .attr('class', 'table-cell')
+                            .style("display", 'flex')
+                            .style("align-items", 'center')
                             .html((d, i) => {
                                 if (i == 0 && color)
                                     return '<svg></svg>' + '<div style="flex:1">' + d.value + '</div>'
