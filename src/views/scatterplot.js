@@ -53,6 +53,9 @@ export default function () {
                 }
             })
 
+            const sizeScale = d3.scaleLinear()
+                .domain(d3.extent(data.data.map(d => d.size)))
+                .range([4, 15])
 
             function draw() {
                 const bBox = div.getBoundingClientRect()
@@ -81,10 +84,6 @@ export default function () {
                 const yScale = d3.scaleLinear()
                     .domain(utils.padLinear(d3.extent(data.data.map(d => d.y)), 0.1))
                     .range([height, 0])
-
-                const sizeScale = d3.scaleLinear()
-                    .domain(d3.extent(data.data.map(d => d.size)))
-                    .range([4, 15])
 
                 const tooltip = dom.append("div")
                     .style("opacity", 0)
@@ -154,11 +153,11 @@ export default function () {
                                 zoomTransform.invert(event.selection[1])
                             ]
 
-                            const selected = data.data.filter(d => 
-                                selection[0][0] <= xScale(d.x) && 
-                                xScale(d.x) <= selection[1][0] && 
-                                selection[0][1] <= yScale(d.y) && 
-                                yScale(d.y) <= selection[1][1] 
+                            const selected = data.data.filter(d =>
+                                selection[0][0] <= xScale(d.x) &&
+                                xScale(d.x) <= selection[1][0] &&
+                                selection[0][1] <= yScale(d.y) &&
+                                yScale(d.y) <= selection[1][1]
                             ).map(d => d.label)
 
                             onSelect(selected)
