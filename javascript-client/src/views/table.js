@@ -1,8 +1,7 @@
 import * as d3 from 'd3'
 
 export default function () {
-    let data = { data: [], selected: null }
-    let sorting = null
+    let data = { data: [], sorting: null, selected: null }
 
     const sortingOrders = [
         { class: 'aes', function: d3.ascending },
@@ -11,15 +10,16 @@ export default function () {
 
     let updateData
     let onClick
+    let onSort
 
     const table = function (selection) {
         selection.each(function () {
             const dom = d3.select(this)
 
-            const titles = (data.data.length > 0 ? Object.keys(data.data[0]) : []).filter(t => t != 'color')
+            const titles = (data.data.length > 0 ? Object.keys(data.data[0]) : []).filter(t => t != 'color' && t != 'selected')
             const color = data.data.length > 0 && Object.keys(data.data[0]).includes('color')
-            if (titles.length > 0 && sorting == null)
-                sorting = [titles[0], 0]
+            if (titles.length > 0 && data.sorting == null)
+                data.sorting = [titles[0], 0]
 
             const table = dom.append('table')
                 .attr('width', '100%')
@@ -31,15 +31,15 @@ export default function () {
                 .data(titles)
                 .enter()
                 .append('th')
-                .attr('class', (d) => { if (sorting[0] == d) return sortingOrders[sorting[1]].class })
+                .attr('class', (d) => { if (data.sorting[0] == d) return sortingOrders[data.sorting[1]].class })
                 .text((d) => d)
 
             const rows = body.selectAll('tr')
-                .data(data.data.sort((a, b) => sortingOrders[sorting[1]].function(a[sorting[0]], b[sorting[0]])))
+                .data(data.data.sort((a, b) => sortingOrders[data.sorting[1]].function(a[data.sorting[0]], b[data.sorting[0]])))
                 .enter()
                 .append('tr')
                 .attr('class', (d) => {
-                    if (data.selected && d[data.selected.key] == data.selected.value)
+                    if (d.selected || (data.selected != null && d[data.selected.key] == data.selected.value))
                         return "selected"
                     return ''
                 })
@@ -71,23 +71,13 @@ export default function () {
 
             rows.on('click', (_e, d) => onClick(d))
 
-            headers.on('click', function (event, d) {
-                headers.attr('class', 'header')
-
-                if (d == sorting[0])
-                    sorting[1] = sorting[1] == 1 ? 0 : 1
-                else
-                    sorting[0] = d
-
-                this.className = sortingOrders[sorting[1]].class
-                rows.sort((a, b) => sortingOrders[sorting[1]].function(a[sorting[0]], b[sorting[0]]))
-            })
+            headers.on('click', (_e, d) => onSort(d))
 
             updateData = function () {
-                const titles = (data.data.length > 0 ? Object.keys(data.data[0]) : []).filter(t => t != 'color')
+                const titles = (data.data.length > 0 ? Object.keys(data.data[0]) : []).filter(t => t != 'color' && t != 'selected')
                 const color = data.data.length > 0 && Object.keys(data.data[0]).includes('color')
-                if (titles.length > 0 && sorting == null)
-                    sorting = [titles[0], 0]
+                if (titles.length > 0 && data.sorting == null)
+                    data.sorting = [titles[0], 0]
 
                 const headers = header
                     .selectAll('th')
@@ -95,28 +85,28 @@ export default function () {
                     .join(
                         enter => enter
                             .append('th')
-                            .attr('class', (d) => { if (sorting[0] == d) return sortingOrders[sorting[1]].class })
+                            .attr('class', (d) => { if (data.sorting[0] == d) return sortingOrders[data.sorting[1]].class })
                             .text((d) => d),
                         update => update
-                            .attr('class', (d) => { if (sorting[0] == d) return sortingOrders[sorting[1]].class })
+                            .attr('class', (d) => { if (data.sorting[0] == d) return sortingOrders[data.sorting[1]].class })
                             .text((d) => d),
                         exit => exit.remove()
                     )
 
                 const rows = body
                     .selectAll('tr')
-                    .data(data.data.sort((a, b) => sortingOrders[sorting[1]].function(a[sorting[0]], b[sorting[0]])))
+                    .data(data.data.sort((a, b) => sortingOrders[data.sorting[1]].function(a[data.sorting[0]], b[data.sorting[0]])))
                     .join(
                         enter => enter
                             .append('tr')
                             .attr('class', (d) => {
-                                if (data.selected && d[data.selected.key] == data.selected.value)
+                                if (d.selected || (data.selected != null && d[data.selected.key] == data.selected.value))
                                     return "selected"
                                 return ''
                             }),
                         update => update
                             .attr('class', (d) => {
-                                if (data.selected && d[data.selected.key] == data.selected.value)
+                                if (d.selected || (data.selected != null && d[data.selected.key] == data.selected.value))
                                     return "selected"
                                 return ''
                             }),
@@ -176,17 +166,9 @@ export default function () {
                         exit => exit.remove()
                     )
 
-                headers.on('click', function (event, d) {
-                    headers.attr('class', 'header')
 
-                    if (d == sorting[0])
-                        sorting[1] = sorting[1] == 1 ? 0 : 1
-                    else
-                        sorting[0] = d
-
-                    this.className = sortingOrders[sorting[1]].class
-                    rows.sort((a, b) => sortingOrders[sorting[1]].function(a[sorting[0]], b[sorting[0]]))
-                })
+                rows.on('click', (_e, d) => onClick(d))
+                headers.on('click', (_e, d) => onSort(d))
             }
         })
     }
@@ -199,6 +181,7 @@ export default function () {
     }
 
     table.bindClick = (callback) => onClick = callback
+    table.bindSort = (callback) => onSort = callback
 
     return table
 

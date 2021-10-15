@@ -3,6 +3,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
 const meta = require('./package.json')
+const CopyPlugin = require("copy-webpack-plugin")
 
 const config = {
   entry: { main: './src/index.js' },
@@ -39,7 +40,12 @@ const config = {
       title: meta.name,
       hash: true,
       alwaysWriteToDisk: true
-    })
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: path.resolve(__dirname, "../preprocessed-data/papers.csv"), to: path.resolve(__dirname, 'dist') },
+      ],
+    }),
   ]
 }
 
@@ -50,6 +56,7 @@ module.exports = (_, argv) => {
     config.devServer = {
       contentBase: path.resolve(__dirname, 'dist'),
       historyApiFallback: true,
+      writeToDisk: true,
       watchContentBase: true
     }
     config.plugins.push(new HtmlWebpackHarddiskPlugin({

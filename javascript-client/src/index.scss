@@ -14,7 +14,7 @@ body {
   flex: 1;
   display: grid;
   margin: 10px;
-  grid-template-columns: minmax(0, 1fr) 50vh minmax(0, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));//minmax(0, 1fr) 50vh minmax(0, 1fr);
   grid-template-rows: repeat(2, minmax(0, 1fr));
   grid-gap: 10px;
 }
@@ -117,9 +117,29 @@ th.aes:after {
   margin-right: 10px;
 }
 
+#keywords_table {
+  background: darkgray;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  tbody tr {
+    cursor: pointer;
+  }
+}
+
+#keywords_table {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+#clustering_params {
+  grid-column: 1;
+  grid-row: 2;
+}
 
 #topics_table {
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 1;
   background: darkgray;
   display: flex;
@@ -133,7 +153,7 @@ th.aes:after {
 
 #keywords_plot {
   grid-column: 2;
-  grid-row: 1;
+  grid-row: 2;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: min-content minmax(0, 1fr);
@@ -148,12 +168,12 @@ th.aes:after {
 }
 
 #filters {
-  grid-column: 1;
-  grid-row: 2;
+  grid-column: 4;
+  grid-row: 1;
 }
 
 #papers_table {
-  grid-column: 2/4;
+  grid-column: 3/5;
   grid-row: 2;
   background: darkgray;
   display: flex;

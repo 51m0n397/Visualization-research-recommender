@@ -4,12 +4,13 @@ export default function () {
     let data = { name: "", range: [], selected: [] }
 
     const height = 20
-    const margin = 5
+    const verticalMargin = 5
+    const horizzontalMargin = 10
     const barHeight = 5
 
     let onSelect
     let updateData
-    const range = function (selection) {
+    const doubleRangeSlider = function (selection) {
         selection.each(function () {
             const div = this
             const dom = d3.select(div)
@@ -20,21 +21,37 @@ export default function () {
                 .html(data.name + ":")
                 .attr('class', "input-title")
 
-            const svg = dom.append("svg")
+            const container = dom.append('div')
+                .style('width', '100%')
+                .style('display', 'flex')
+                .style('flex-flow', 'wrap')
+
+            const minLabel = container.append('div')
+                .text(data.range[0])
+                .style('margin-top', verticalMargin + "px")
+
+            const svgContainer = container.append("div")
+                .style('min-width', 0)
+                .style('flex', 1)
+            const svg = svgContainer.append("svg")
+
+            const maxLabel = container.append('div')
+                .text(data.range[1])
+                .style('margin-top', verticalMargin + "px")
 
             function draw() {
-                const bBox = div.getBoundingClientRect()
+                const bBox = svgContainer.node().getBoundingClientRect()
 
                 svg.selectAll("*").remove()
 
                 svg.attr("width", bBox.width)
                     .attr("height", height + 12)
 
-                const width = bBox.width - 2 * margin
+                const width = bBox.width - 2 * horizzontalMargin
 
                 const svgGroup = svg.append("g")
                     .attr("transform",
-                        "translate(" + margin + ",0)")
+                        "translate(" + horizzontalMargin + ",0)")
 
 
                 const scale = d3.scaleLinear()
@@ -54,19 +71,19 @@ export default function () {
                 let lastSelection = []
 
                 const minLabel = svgGroup.append('text')
-                    .text(scale.domain()[0])
+                    .text(data.selected[0])
                     .attr('text-anchor', "middle")
                     .attr('dx', 2)
                     .attr('y', height + 10)
 
                 const maxLabel = svgGroup.append('text')
-                    .text(scale.domain()[1])
+                    .text(data.selected[1])
                     .attr('text-anchor', "middle")
                     .attr('dx', 2)
                     .attr('y', height + 10)
 
                 const brush = d3.brushX()
-                    .extent([[0, margin], [width, height-margin]])
+                    .extent([[0, verticalMargin], [width, height - verticalMargin]])
                     .on("start", (event) => {
                         lastSelection = event.selection
                         brushArea.select('.selection')
@@ -104,8 +121,6 @@ export default function () {
                     .attr("class", "brush")
                     .call(brush)
 
-
-
                 brushArea.call(brush.move, data.selected.map(scale))
 
                 brushArea.select('.selection')
@@ -127,19 +142,19 @@ export default function () {
                 maxLabel.attr('x', brushArea.select('.handle--e').attr('x'))
             }
 
-            draw()
+            setTimeout(draw, 1)
             window.addEventListener('resize', draw)
         })
     }
 
-    range.data = function (_) {
+    doubleRangeSlider.data = function (_) {
         if (!arguments.length) return data
         data = _
         if (typeof updateData === 'function') updateData()
-        return range
+        return doubleRangeSlider
     }
 
-    range.bindSelect = (callback) => onSelect = callback
+    doubleRangeSlider.bindSelect = (callback) => onSelect = callback
 
-    return range
+    return doubleRangeSlider
 }

@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 import * as utils from '../utils'
 
 export default function () {
-    let data = { data: [], selected: [] }
+    let data = { data: [], selected: [], sizeRange: [] }
 
     const margin = { top: 0, right: 0, bottom: 25, left: 0 }
 
@@ -45,17 +45,21 @@ export default function () {
                 zoomOrBrush = div.querySelector("input[name='zoom-brush']:checked").value
 
                 if (zoomOrBrush == 'zoom') {
-                    svg.select('.brush').on('.brush', null)
+                    svg.select('.brush')
+                        .style('display', 'none')
+                        .on('.brush', null)
                     svg.call(zoom).call(zoom.transform, zoomTransform)
                 } else {
                     svg.on('.zoom', null)
-                    svg.select('.brush').call(brush)
+                    svg.select('.brush')
+                        .style('display', 'block')
+                        .call(brush)
                 }
             })
 
             const sizeScale = d3.scaleLinear()
-                .domain(d3.extent(data.data.map(d => d.size)))
-                .range([4, 15])
+                .domain(data.sizeRange)
+                .range([3, 20])
 
             function draw() {
                 const bBox = div.getBoundingClientRect()
@@ -98,9 +102,10 @@ export default function () {
 
                 function mousemove(event, d) {
                     tooltip
-                        .html("keyword: " + d.label + "<br>topic: " + d.class)
+                        .html("Keyword: " + d.label + "<br>Topic: " + d.class + "<br>Papers: " + d.size)
                         .style("left", (event.pageX + 10) + "px")
-                        .style("top", (event.pageY) + "px")
+                        .style("top", (event.pageY-15) + "px")
+                        .style("z-index", 2)
                 }
 
                 function mouseleave(event, d) {
@@ -168,25 +173,50 @@ export default function () {
 
 
                 if (zoomOrBrush == 'zoom') {
-                    brushArea.on('.brush', null)
+                    brushArea
+                        .style('display', 'none')
+                        .on('.brush', null)
                     svg.call(zoom).call(zoom.transform, zoomTransform)
                 } else {
                     svg.on('.zoom', null)
-                    brushArea.call(brush)
+                    brushArea
+                        .style('display', 'block')
+                        .call(brush)
                 }
 
                 updateData = function () {
+                    xScale.domain(utils.padLinear(d3.extent(data.data.map(d => d.x)), 0.1))
+                    yScale.domain(utils.padLinear(d3.extent(data.data.map(d => d.y)), 0.1))
+                    sizeScale.domain(data.sizeRange)
+
                     pointsGroup.selectAll("circle")
                         .data(data.data)
-                        .style("stroke-width", (d) => (data.selected.includes(d.label) ? 2 : 1) / zoomTransform.k)
-                        .transition()
-                        .duration(500)
-                        .attr("cx", (d) => xScale(d.x))
-                        .attr("cy", (d) => yScale(d.y))
-                        .attr("transform", zoomTransform)
-                        .attr("r", (d) => d.size > 0 ? sizeScale(d.size) / zoomTransform.k : 0)
-                        .style("fill", (d) => d.color)
-                        .style("stroke", (d) => data.selected.includes(d.label) ? "black" : "grey")
+                        .join(
+                            enter => enter
+                                .append("circle")
+                                .attr("cx", (d) => xScale(d.x))
+                                .attr("cy", (d) => yScale(d.y))
+                                .attr("transform", zoomTransform)
+                                .attr("r", (d) => d.size > 0 ? sizeScale(d.size) / zoomTransform.k : 0)
+                                .style("fill", (d) => d.color)
+                                .style("stroke", (d) => data.selected.includes(d.label) ? "black" : "grey")
+                                .style("stroke-width", (d) => (data.selected.includes(d.label) ? 2 : 1) / zoomTransform.k)
+                                .on("mouseover", mouseover)
+                                .on("mousemove", mousemove)
+                                .on("mouseleave", mouseleave),
+                            update => update
+                                .attr("cx", (d) => xScale(d.x))
+                                .attr("cy", (d) => yScale(d.y))
+                                .attr("transform", zoomTransform)
+                                .attr("r", (d) => d.size > 0 ? sizeScale(d.size) / zoomTransform.k : 0)
+                                .style("fill", (d) => d.color)
+                                .style("stroke", (d) => data.selected.includes(d.label) ? "black" : "grey")
+                                .style("stroke-width", (d) => (data.selected.includes(d.label) ? 2 : 1) / zoomTransform.k)
+                                .on("mouseover", mouseover)
+                                .on("mousemove", mousemove)
+                                .on("mouseleave", mouseleave),
+                            exit => exit.remove()
+                        )
                 }
 
             }

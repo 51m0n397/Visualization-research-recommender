@@ -173,6 +173,7 @@ export default function () {
                         )
                         .style("right", (window.innerWidth - event.pageX + 10) + "px")
                         .style("top", (event.pageY) + "px")
+                        .style("z-index", 2)
                 }
 
                 function mouseleave(event, d) {

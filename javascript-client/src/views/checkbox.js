@@ -12,22 +12,42 @@ export default function () {
 
             dom.attr('class', "input-container")
 
-            dom.append("div")
+            const title = dom.append("div")
                 .html(data.name + ":")
                 .attr('class', "input-title")
 
-            dom.selectAll("input")
+            const checkboxes = dom.append('div')
+
+            checkboxes.selectAll("input")
                 .data(Object.entries(data.data))
                 .enter()
                 .append("div")
-                .html((d) => d[0] + " ")
+                .text((d) => d[0] + " ")
                 .attr("class", "check-elem")
                 .append("input")
                 .attr('type', "checkbox")
-                .attr('checked', (d) => d[1])
+                .property('checked', (d) => d[1])
                 .attr('value', (d) => d[0])
                 .on("click", (e, d) => onClick(d[0], e.target.checked))
 
+            updateData = function () {
+                title.html(data.name + ":")
+
+                checkboxes.selectAll("*").remove()
+
+                checkboxes.selectAll("input")
+                .data(Object.entries(data.data))
+                .enter()
+                .append("div")
+                .text((d) => d[0] + " ")
+                .attr("class", "check-elem")
+                .append("input")
+                .attr('type', "checkbox")
+                .property('checked', (d) => d[1])
+                .attr('value', (d) => d[0])
+                .on("click", (e, d) => onClick(d[0], e.target.checked))
+
+            }
 
         })
     }
