@@ -19,7 +19,7 @@ class Model {
         this.selectedOccurrencies = []
 
         this.distanceRange = [0, 1]
-        this.distaceThreshold = 0.77
+        this.distaceThreshold = 0.73
 
         this.topics = []
         this.topicsById = []
