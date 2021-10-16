@@ -154,6 +154,7 @@ class Controller {
                     "Paper type": p.PaperType,
                     Year: p.Year,
                     Keywords: p.Keywords.join(', '),
+                    Topics: p.Topics.join(', '),
                 }))
         })
 
@@ -170,8 +171,8 @@ class Controller {
             data: this.model.topics.map(t => ({
                 Topic: t.Topic,
                 Keywords: t.Keywords.join(', '),
-                Papers: filteredPapers.filter(p => utils.arrayIntersection(p.Keywords, t.Keywords).length > 0).length,
-                Citations: citations.filter(c => utils.arrayIntersection(c.Keywords, t.Keywords).length > 0).length,
+                Papers: filteredPapers.filter(p => p.Topics.includes(t.Topic)).length,
+                Citations: citations.filter(p => p.Topics.includes(t.Topic)).length,
                 color: this.model.topics.length <= 12 ? this.model.colorScale(t.Topic) : this.model.colorScale.range()[0]
             })),
             selected: { key: "Topic", value: this.model.selectedTopic }

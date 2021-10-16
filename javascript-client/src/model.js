@@ -148,6 +148,16 @@ class Model {
             })
         })
 
+        this.papers.forEach(p => {
+            let topics = new Set()
+            p.Keywords.forEach(k => {
+                const topic = this.keywordsTopics[k]
+                if (topic != null)
+                topics.add(this.keywordsTopics[k])
+            })
+            p.Topics = Array.from(topics)
+        })
+
         this.onTopicsChanged()
     }
 
