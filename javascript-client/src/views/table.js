@@ -35,7 +35,7 @@ export default function () {
                 .text((d) => d)
 
             const rows = body.selectAll('tr')
-                .data(data.data.sort((a, b) => sortingOrders[data.sorting[1]].function(a[data.sorting[0]], b[data.sorting[0]])))
+                .data(data.data)
                 .enter()
                 .append('tr')
                 .attr('class', (d) => {
@@ -69,8 +69,9 @@ export default function () {
                 .style("stroke", "grey")
                 .style("stroke-width", 1)
 
-            rows.on('click', (_e, d) => onClick(d))
+            rows.sort((a, b) => sortingOrders[data.sorting[1]].function(a[data.sorting[0]], b[data.sorting[0]]))
 
+            rows.on('click', (_e, d) => onClick(d))
             headers.on('click', (_e, d) => onSort(d))
 
             updateData = function () {
@@ -95,7 +96,7 @@ export default function () {
 
                 const rows = body
                     .selectAll('tr')
-                    .data(data.data.sort((a, b) => sortingOrders[data.sorting[1]].function(a[data.sorting[0]], b[data.sorting[0]])))
+                    .data(data.data)
                     .join(
                         enter => enter
                             .append('tr')
@@ -166,6 +167,7 @@ export default function () {
                         exit => exit.remove()
                     )
 
+                rows.sort((a, b) => sortingOrders[data.sorting[1]].function(a[data.sorting[0]], b[data.sorting[0]]))
 
                 rows.on('click', (_e, d) => onClick(d))
                 headers.on('click', (_e, d) => onSort(d))
