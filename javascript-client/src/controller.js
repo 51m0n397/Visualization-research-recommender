@@ -32,9 +32,6 @@ class Controller {
             this.model.toggleKeyword(keyword.Keyword)
         }).bind(this)
 
-        this.keywordsTable.bindSort((by) => {
-            this.model.sortKeywords(by)
-        }).bind(this)
 
         this.occurrenciesFilter.bindSelect((occurreciesRange) => {
             this.model.selectOccurrencies(occurreciesRange)
@@ -71,7 +68,7 @@ class Controller {
                 k.Occurrencies >= this.model.selectedOccurrencies[0] &&
                 k.Occurrencies <= this.model.selectedOccurrencies[1]
             ),
-            sorting: this.model.keywordsSorting
+            initialSorting: ['Occurrencies', 1]
         })
 
         this.occurrenciesFilter.data({
@@ -175,7 +172,7 @@ class Controller {
                 Keywords: t.Keywords.join(', '),
                 Papers: filteredPapers.filter(p => utils.arrayIntersection(p.Keywords, t.Keywords).length > 0).length,
                 Citations: citations.filter(c => utils.arrayIntersection(c.Keywords, t.Keywords).length > 0).length,
-                color: this.model.topics.length <= 12 ? this.model.colorScale(t.Topic) : null
+                color: this.model.topics.length <= 12 ? this.model.colorScale(t.Topic) : this.colorScale.range()[0]
             })),
             selected: { key: "Topic", value: this.model.selectedTopic }
         })

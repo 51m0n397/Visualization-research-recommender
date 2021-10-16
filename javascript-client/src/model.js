@@ -101,14 +101,6 @@ class Model {
         this.onClusteringParamsChanged()
     }
 
-    sortKeywords(by) {
-        if (by == this.keywordsSorting[0])
-            this.keywordsSorting[1] = this.keywordsSorting[1] == 1 ? 0 : 1
-        else
-            this.keywordsSorting[0] = by
-        this.onKeywordsChanged()
-    }
-
     selectOccurrencies(occurreciesRange) {
         this.selectedOccurrencies = occurreciesRange
         this.onKeywordsChanged()
@@ -127,7 +119,7 @@ class Model {
         this.selectedTopic = null
 
 
-        const sortedKeywords = this.keywords.sort((a, b) => d3.descending(a.Occurrencies, b.Occurrencies))
+        const sortedKeywords = [...this.keywords].sort((a, b) => d3.descending(a.Occurrencies, b.Occurrencies))
 
         this.keywordsTopics = {}
 
