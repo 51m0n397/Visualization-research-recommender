@@ -13,6 +13,7 @@ class Model {
         this.keywordsSorting = []
         this.keywordsTopics = {}
         this.keywordsPoints = []
+        this.keywordsSortedByOccurrencies = []
 
         this.occurreciesRange = []
         this.selectedOccurrencies = []
@@ -87,6 +88,7 @@ class Model {
             this.selectedOccurrencies = this.occurreciesRange.slice()
             this.selectedOccurrencies[0] = 10
             this.selectedOccurrencies[1] = 100
+            this.keywordsSortedByOccurrencies = [...this.keywords].sort((a, b) => d3.descending(a.Occurrencies, b.Occurrencies))
         })
 
         this.onKeywordsChanged()
@@ -118,13 +120,10 @@ class Model {
         this.selectedKeywords = []
         this.selectedTopic = null
 
-
-        const sortedKeywords = [...this.keywords].sort((a, b) => d3.descending(a.Occurrencies, b.Occurrencies))
-
         this.keywordsTopics = {}
 
         topics.forEach(t => {
-            const topic = sortedKeywords.find(k => t.includes(k.Keyword)).Keyword
+            const topic = this.keywordsSortedByOccurrencies.find(k => t.includes(k.Keyword)).Keyword
             this.topics.push({Topic: topic, Keywords: t})
             this.topicsById[topic] = this.topics.length - 1
 
