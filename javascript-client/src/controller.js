@@ -172,7 +172,7 @@ class Controller {
                 Keywords: t.Keywords.join(', '),
                 Papers: filteredPapers.filter(p => utils.arrayIntersection(p.Keywords, t.Keywords).length > 0).length,
                 Citations: citations.filter(c => utils.arrayIntersection(c.Keywords, t.Keywords).length > 0).length,
-                color: this.model.topics.length <= 12 ? this.model.colorScale(t.Topic) : this.colorScale.range()[0]
+                color: this.model.topics.length <= 12 ? this.model.colorScale(t.Topic) : this.model.colorScale.range()[0]
             })),
             selected: { key: "Topic", value: this.model.selectedTopic }
         })
