@@ -37,9 +37,9 @@ const app = function () {
             .html('Clustering Parameters')
         clusteringParametersContainer
             .append('div')
-            .attr('id', 'occurrencies_filter')
+            .attr('id', 'occurrences_filter')
             .style('margin', '10px')
-            .call(window.app.occurrenciesFilter)
+            .call(window.app.occurrencesFilter)
         clusteringParametersContainer
             .append('div')
             .attr('id', 'distance_treshold')

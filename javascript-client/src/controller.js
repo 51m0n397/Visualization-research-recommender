@@ -11,7 +11,7 @@ class Controller {
         this.overlay = views.loadingOverlay()
 
         this.keywordsTable = views.table()
-        this.occurrenciesFilter = views.doubleRangeSlider()
+        this.occurrencesFilter = views.doubleRangeSlider()
         this.distanceSlider = views.rangeSlider()
         this.keywordsCount = views.textbox()
         this.topicsCount = views.textbox()
@@ -33,8 +33,8 @@ class Controller {
         }).bind(this)
 
 
-        this.occurrenciesFilter.bindSelect((occurreciesRange) => {
-            this.model.selectOccurrencies(occurreciesRange)
+        this.occurrencesFilter.bindSelect((occurreciesRange) => {
+            this.model.selectOccurrences(occurreciesRange)
         }).bind(this)
 
         this.distanceSlider.bindChange((threshold) => {
@@ -65,22 +65,22 @@ class Controller {
     onKeywordsChanged() {
         this.keywordsTable.data({
             data: this.model.keywords.slice().filter(k =>
-                k.Occurrencies >= this.model.selectedOccurrencies[0] &&
-                k.Occurrencies <= this.model.selectedOccurrencies[1]
+                k.Occurrences >= this.model.selectedOccurrences[0] &&
+                k.Occurrences <= this.model.selectedOccurrences[1]
             ),
-            initialSorting: ['Occurrencies', 1]
+            initialSorting: ['Occurrences', 1]
         })
 
-        this.occurrenciesFilter.data({
-            name: 'Occurrencies range',
+        this.occurrencesFilter.data({
+            name: 'Occurrences range',
             range: this.model.occurreciesRange,
-            selected: this.model.selectedOccurrencies
+            selected: this.model.selectedOccurrences
         })
 
         this.keywordsCount.text(
             this.model.keywords.filter(k =>
-                k.Occurrencies >= this.model.selectedOccurrencies[0] &&
-                k.Occurrencies <= this.model.selectedOccurrencies[1] &&
+                k.Occurrences >= this.model.selectedOccurrences[0] &&
+                k.Occurrences <= this.model.selectedOccurrences[1] &&
                 k.selected
             ).length + ' keywords')
     }
@@ -99,8 +99,8 @@ class Controller {
         axios
             .post('http://localhost:5000/', {
                 keywords: this.model.keywords.filter(k =>
-                    k.Occurrencies >= this.model.selectedOccurrencies[0] &&
-                    k.Occurrencies <= this.model.selectedOccurrencies[1] &&
+                    k.Occurrences >= this.model.selectedOccurrences[0] &&
+                    k.Occurrences <= this.model.selectedOccurrences[1] &&
                     k.selected
                 ).map(k => k.Keyword),
                 threshold: this.model.distaceThreshold
@@ -140,7 +140,7 @@ class Controller {
                 color: k.color
             })),
             selected: this.model.selectedKeywords,
-            sizeRange: d3.extent(this.model.keywords.map(k => k.Occurrencies))
+            sizeRange: d3.extent(this.model.keywords.map(k => k.Occurrences))
         })
 
         const selectedPapers = filteredPapers.filter(p => utils.arrayIntersection(p.Keywords, this.model.selectedKeywords).length > 0)

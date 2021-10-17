@@ -13,10 +13,10 @@ class Model {
         this.keywordsSorting = []
         this.keywordsTopics = {}
         this.keywordsPoints = []
-        this.keywordsSortedByOccurrencies = []
+        this.keywordsSortedByOccurrences = []
 
         this.occurreciesRange = []
-        this.selectedOccurrencies = []
+        this.selectedOccurrences = []
 
         this.distanceRange = [0, 1]
         this.distaceThreshold = 0.73
@@ -76,19 +76,19 @@ class Model {
 
             paper.Keywords.forEach(k => {
                 if (this.keywordsById[k] == null) {
-                    this.keywords.push({ Keyword: k, Occurrencies: 1, selected: true })
+                    this.keywords.push({ Keyword: k, Occurrences: 1, selected: true })
                     this.keywordsById[k] = this.keywords.length - 1
                 } else {
-                    this.keywords[this.keywordsById[k]].Occurrencies++
+                    this.keywords[this.keywordsById[k]].Occurrences++
                 }
             })
 
-            this.keywordsSorting = ['Occurrencies', 1]
-            this.occurreciesRange = d3.extent(this.keywords.map(k => k.Occurrencies))
-            this.selectedOccurrencies = this.occurreciesRange.slice()
-            this.selectedOccurrencies[0] = 10
-            this.selectedOccurrencies[1] = 100
-            this.keywordsSortedByOccurrencies = [...this.keywords].sort((a, b) => d3.descending(a.Occurrencies, b.Occurrencies))
+            this.keywordsSorting = ['Occurrences', 1]
+            this.occurreciesRange = d3.extent(this.keywords.map(k => k.Occurrences))
+            this.selectedOccurrences = this.occurreciesRange.slice()
+            this.selectedOccurrences[0] = 10
+            this.selectedOccurrences[1] = 100
+            this.keywordsSortedByOccurrences = [...this.keywords].sort((a, b) => d3.descending(a.Occurrences, b.Occurrences))
         })
 
         this.onKeywordsChanged()
@@ -103,8 +103,8 @@ class Model {
         this.onClusteringParamsChanged()
     }
 
-    selectOccurrencies(occurreciesRange) {
-        this.selectedOccurrencies = occurreciesRange
+    selectOccurrences(occurreciesRange) {
+        this.selectedOccurrences = occurreciesRange
         this.onKeywordsChanged()
         this.onClusteringParamsChanged()
     }
@@ -123,7 +123,7 @@ class Model {
         this.keywordsTopics = {}
 
         topics.forEach(t => {
-            const topic = this.keywordsSortedByOccurrencies.find(k => t.includes(k.Keyword)).Keyword
+            const topic = this.keywordsSortedByOccurrences.find(k => t.includes(k.Keyword)).Keyword
             this.topics.push({Topic: topic, Keywords: t})
             this.topicsById[topic] = this.topics.length - 1
 
@@ -135,8 +135,8 @@ class Model {
 
         this.keywordsPoints = []
         this.keywords.filter(k =>
-            k.Occurrencies >= this.selectedOccurrencies[0] &&
-            k.Occurrencies <= this.selectedOccurrencies[1] &&
+            k.Occurrences >= this.selectedOccurrences[0] &&
+            k.Occurrences <= this.selectedOccurrences[1] &&
             k.selected
         ).forEach((k, i) => {
             this.keywordsPoints.push({
