@@ -9,6 +9,8 @@ Visualization research recommender is a visual analytics tool that can be used t
 - `preprocessed-data` contains the result of the preprocessing
 - `python-server` contains the code for the python-based server responsible for clustering the keywords into topics
 - `javascript-client` contains the code for the html+javascript webpage that implements the tool
+- `report` contains the relation describing the tool
+- `presentation` contains the powerpoint presentation describing the tool
 
 ## How to run
 - To start the python server go into the `python-server` folder and use the command `python3 server.py`. This will launch the server locally on port 5000
