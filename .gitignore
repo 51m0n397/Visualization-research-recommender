@@ -291,3 +291,13 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
+
+# powepoint
+~$*
+
+# latex
+*.aux
+*.bbl
+*.blg
+*.out
+*.synctex.gz
