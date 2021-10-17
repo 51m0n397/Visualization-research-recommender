@@ -17,7 +17,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('keywords', action='append')
 parser.add_argument('threshold', type=float)
 
-papers = pd.read_csv("preprocessed-data/papers.csv")
+papers = pd.read_csv("../preprocessed-data/papers.csv")
 papers_keywords = np.array(papers['Keywords'].apply(lambda x: x.split(";")))
 
 def create_co_occurences_matrix(allowed_words, documents):
